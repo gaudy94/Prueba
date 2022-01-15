@@ -1,0 +1,73 @@
+---
+title: "practica general"
+author: "Sergio Martínez-Campos Gutiérrez"
+date: "13/1/2022"
+output: html_document
+---
+
+###Primero es necesario preparar los datos
+
+Se crea en primer lugar una carpeta que se asociará a github al final de la práctica, denominada práctica general. Tras ello, se crea el archivo R Markdown, en File > New File > R Markdown y ponemos en el metadata el formato htlm, el título, el nombre de autor y la fecha.
+Después se procede a la descarga de la librería para poder acceder a los datos
+```{r}
+install.packages("palmerpenguins")
+library(palmerpenguins)
+data(package = 'palmerpenguins')
+data("penguins")
+```
+###Preparación de librerías
+A lo largo de este ejercicio vamos a requerir usar varias liberias ya instaladas durante las clases, así que a continuación se instalaran todas las que son necesarias. 
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+```
+
+### (1) Número de individuos totales, masculinos y femeninos por especie. La media, desviación estándar, valor mínimo y máximo de la longitud y profundidad del pico, la longitud de la aleta y el tamaño
+
+Los resultados para este apartado son:
+* El número total de inviduos es de 344.
+* El número de individuos masculinos muestreados fueron 168, mientras que el de hembras fue 165. No se tiene información del sexo de los otros 11 individuos.
+* La media de la profundidad del pico es  17.15 mm, la desviación estándar es 1.97 mm, el valor minimo  13.1 cm   y  el valor máximo obtenido es 21.5 mm
+* La media de la longitud del pico es  43.2 mm, la desviación estándar es 5.46 mm , el valor minimo 32.1 mm  y  el valor máximo obtenido es 59.66 mm
+* La media de la longitud de la aleta es  200 mm, la desviación estándar es 14.06 mm, el valor minimo  172 mm   y  el valor máximo obtenido es 231 mm
+* La media del tamaño es  4202 g, la desviación estándar es 802 g, el valor minimo  2700 g   y  el valor máximo obtenido es 6300 g
+
+Para obtener estos datos en primer lugar se calculo el número total a partir de la función str() al decirnos que estamos ante una matriz de 344 filas (cada fila es una observación) y 8 columnas con cada columna dandonos los distintos datos. Por otro lado la función summary() nos proporciona los datos estadísticos básicos de cada una de las columnas, con excepción de la desviación estandár. Para ello, recurrimos a realizar la función sd() para cada una de las columnas a medir, optando por la opción na.rm = TRUE para que omita aquellas observaciones para las que no se dispone dato (NA)
+
+```{r}
+str(penguins)
+
+summary(penguins)
+
+sd(penguins$bill_length_mm, na.rm = TRUE)
+sd(penguins$bill_depth_mm, na.rm = TRUE)
+sd(penguins$flipper_length_mm, na.rm = TRUE)
+sd(penguins$body_mass_g, na.rm = TRUE)
+```
+###(2) Un gráfico de barras que represente el número de individuos muestreados de cada especie en cada isla, representando las especies en diferentes colores (chinstrap – morado, gentoo – azul, adelie – naranja). Contesta a las siguientes preguntas: ¿qué especie se ha muestreado en las tres islas? ¿cuántos individuos se han muestreado de la isla Dream?
+La especie muestreada en las tres islas es Adelie. Los individuos muestreados en la isla Dream son 56 ejemplares de Adelie y 68 ejemplares Chinstrap, es decir un total de 124 individuos
+
+
+Para hacer tanto el gráfico como las preguntas daré una breve explicación a continuación. En primer lugar, no se especifica el tipo de gráfico de barras (compilado o normal con las barras agrupadas según la isla), me he decantado por hacerlo compilado, ya que además de quedar un gráfico mucho más compacto, queda mucho más claro. Para ello en primer lugar había que activar la librería ggplot2. Tras ello, activando el comando ggplot, hay que seleccionar nuestro data.frame penguins, después la opción de gráfico compilado geom_bar (), que es el que permite crear el gráfico de barras compilado. Las opciones permitiran poner en el eje x cada una de las islas y en fill las especies para que se le asigne cada uno de los grupos. Después con scale_fill_manual fijaremos los colores. Los he personalizado buscando en internet la paleta de colores disponibles para ggplot para que quedase más vistoso, pero acorde a lo solicitado.
+Con el gráfico hecho, no he tenido problema para obtener el dato, pero me resultaba imposible obtener el número exacto de individuos muestreados en la isla Dream, así que he diseñado una tabla que además me permitiese ver el número de especies por las islas, para tener un resultado más completo y acorde al gráfico.
+
+
+```{r}
+ggplot(data = penguins) + geom_bar(aes(x = island, fill = species)) + scale_fill_manual(values = c("orange","purple3","dodgerblue1"))
+table(penguins$island, penguins$species)
+```
+
+###(3) Un gráfico multipanel de cajas y bigotes del tamaño de los pingüinos según su sexo, donde aparezca un panel para cada especie. Contesta a las siguientes preguntas: ¿qué especie tiene mayor tamaño? ¿en qué especie las hembras y los machos tienen un tamaño más similar?
+La especie con mayor tamaño es la Gentoo, tanto el masculino como el femenino de la especie. La especie con los tamaños más similares es Chinstrap. Para realizar este gráfico, volvimos a recurrir al paquete ggplot2. En primer lugar, creamos un objeto
+Para realizar un gráfico multipanel, se opta por la opción facet_wrap que, permite que una categoría concreta se convierta en el factor que limita cada uno de los paneles. De esta manera en primer lugar creamos una lista en la que x sea el sexo y la masa e incluimos especie como categoría, dandole formato de caja de bigotes geom_boxplot(). Después aplicamos facet_wrap, en el que le decimos que divida teniendo en cuenta que cada panel sea la especie y para darle una forma bonita, decimos que se refleje en tres columnas.
+
+
+```{r}
+cajadebigotes <- ggplot(data = penguins, aes(x = sex, y = body_mass_g, ... = species)) + 
+  geom_boxplot() 
+cajadebigotes +
+  facet_wrap(facets = vars(species), ncol=3)
+
+```
+##4 
